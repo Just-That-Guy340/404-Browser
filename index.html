@@ -8,26 +8,18 @@
 </head>
 <body>
 
-  <!-- Toolbar -->
   <div id="toolbar">
     <button id="backBtn">←</button>
     <button id="forwardBtn">→</button>
     <button id="reloadBtn">↻</button>
-    
-    <input type="text" id="urlInput" placeholder="Enter URL or search..." autocomplete="off">
-    
+    <input type="text" id="urlInput" placeholder="Enter URL (youtube.com, etc.)" autocomplete="off">
     <button id="goBtn">Go</button>
     <button id="newTabBtn">+ New Tab</button>
   </div>
 
-  <!-- Tabs Bar -->
   <div id="tabsBar" class="tabs"></div>
 
-  <!-- Main Content -->
-  <iframe id="mainFrame" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals allow-downloads allow-presentation"></iframe>
-
-  <!-- Title Screen -->
-  <div id="titleScreen"></div>
+  <iframe id="mainFrame" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals allow-downloads"></iframe>
 
   <script src="script.js"></script>
 </body>
