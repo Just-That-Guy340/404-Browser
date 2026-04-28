@@ -1,31 +1,43 @@
 let tabs = [];
 let currentTabIndex = 0;
+let currentProxyIndex = 0;   // 0 = first proxy
 
 const frame = document.getElementById('mainFrame');
 const tabsBar = document.getElementById('tabsBar');
 const urlInput = document.getElementById('urlInput');
+const proxyDisplay = document.getElementById('currentProxy');
 
-// Multiple public proxies — try in order
-const proxyList = [
+// List of proxies (you can add more)
+const proxies = [
   (u) => `https://corsproxy.io/?${encodeURIComponent(u)}`,
   (u) => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
   (u) => `https://proxy.cors.sh/${u}`,
+  (u) => `https://cors.bridged.cc/${u}`
 ];
 
 function getProxiedURL(url) {
-  if (!url) return '';
   if (!url.startsWith('http')) url = 'https://' + url;
-  
-  // Rotate proxies to increase chance of working against Securly
-  const proxyIndex = Math.floor(Math.random() * proxyList.length);
-  return proxyList[proxyIndex](url);
+  return proxies[currentProxyIndex](url);
 }
 
 function getDomain(url) {
   try {
-    return new URL(url).hostname.replace('www.', '');
+    return new URL(url.startsWith('http') ? url : 'https://'+url).hostname.replace('www.', '');
   } catch {
-    return url.substring(0, 30);
+    return url.substring(0, 25);
+  }
+}
+
+// Switch Proxy Manually
+function switchProxy() {
+  currentProxyIndex = (currentProxyIndex + 1) % proxies.length;
+  proxyDisplay.textContent = currentProxyIndex + 1;
+  
+  // Reload current tab with new proxy
+  const currentTab = tabs[currentTabIndex];
+  if (currentTab && currentTab.url) {
+    currentTab.proxied = getProxiedURL(currentTab.url);
+    frame.src = currentTab.proxied;
   }
 }
 
@@ -39,6 +51,7 @@ function createTab(url = "") {
   tabs.push(tab);
   currentTabIndex = tabs.length - 1;
   renderTabs();
+  
   if (url) {
     frame.src = tab.proxied;
     urlInput.value = url;
@@ -91,19 +104,24 @@ function showNewTab() {
     <body class="newtab">
       <h1>404</h1>
       <div class="glitch">BROWSER ONLINE</div>
-      <p>Simple Helios-style proxy.<br>Enter URL above and press Go.<br>Against Securly — rotate proxies.</p>
+      <p>Helios-style proxy with manual switch.<br>Click "Proxy: X" to change proxy.<br>Good against Securly.</p>
     </body>`;
   urlInput.value = '';
 }
 
-// Event listeners
+// Event Listeners
 document.getElementById('goBtn').onclick = loadURL;
 document.getElementById('newTabBtn').onclick = () => createTab("");
 document.getElementById('reloadBtn').onclick = reloadPage;
 document.getElementById('backBtn').onclick = goBack;
 document.getElementById('forwardBtn').onclick = goForward;
+document.getElementById('proxyBtn').onclick = switchProxy;
 
-urlInput.addEventListener('keypress', e => { if (e.key === 'Enter') loadURL(); });
+urlInput.addEventListener('keypress', e => {
+  if (e.key === 'Enter') loadURL();
+});
 
-// Start
-window.onload = () => createTab("https://www.google.com");
+// Initialize
+window.onload = () => {
+  createTab("https://www.google.com");
+};
